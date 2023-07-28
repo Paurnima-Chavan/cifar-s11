@@ -37,7 +37,7 @@ def load_cifar10_data(batch_size):
             A.PadIfNeeded(min_height=40, min_width=40, border_mode=cv2.BORDER_CONSTANT, value=4, always_apply=True),
             A.RandomCrop(height=32, width=32, always_apply=True),
             A.HorizontalFlip(),
-            A.CoarseDropout(max_holes=1, max_height=8, max_width=8, min_holes=1, min_height=8, min_width=8,
+            A.CoarseDropout(max_holes=1, max_height=32, max_width=32, min_holes=1, min_height=8, min_width=8,
                             fill_value=means),
             ToTensorV2(),
         ]
