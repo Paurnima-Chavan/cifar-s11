@@ -5,12 +5,11 @@ import numpy as np
 # functions to show an image
 
 
-def imshow(img):
-    plt.figure(dpi=500);
 
+
+def imshow(img):  
     img = img / 2 + 0.5     # unnormalize
     plt.imshow(np.clip(np.transpose(img, (1, 2, 0)), 0, 1), cmap='viridis', interpolation='bilinear')
-
 
 
 def plot_dataset_images(train_loader, no_images):
@@ -30,7 +29,7 @@ def plot_dataset_images(train_loader, no_images):
     classes = ['airplane', 'automobile', 'bird', 'cat', 'deer',
                'dog', 'frog', 'horse', 'ship', 'truck']
 
-
+    plt.figure(dpi=500);
     # plot the images in the batch, along with the corresponding labels
     fig = plt.figure(figsize=(25, 4))
     # display 20 images
@@ -38,7 +37,6 @@ def plot_dataset_images(train_loader, no_images):
         ax = fig.add_subplot(2, math.ceil(no_images / 2), idx + 1, xticks=[], yticks=[])
         imshow(images[idx])
         ax.set_title(classes[labels[idx]])
-
 
 def plot_train_test_accuracy_loss(train_losses, train_acc, test_losses, test_acc):
     """
