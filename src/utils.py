@@ -1,5 +1,4 @@
 
-
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -7,8 +6,10 @@ import numpy as np
 
 
 def imshow(img):
+    plt.figure(dpi=500);
+
     img = img / 2 + 0.5     # unnormalize
-    plt.imshow(np.transpose(img, (1, 2, 0)))
+    plt.imshow(np.clip(np.transpose(img, (1, 2, 0)), 0, 1), cmap='viridis', interpolation='bilinear')
 
 
 
@@ -28,6 +29,7 @@ def plot_dataset_images(train_loader, no_images):
 
     classes = ['airplane', 'automobile', 'bird', 'cat', 'deer',
                'dog', 'frog', 'horse', 'ship', 'truck']
+
 
     # plot the images in the batch, along with the corresponding labels
     fig = plt.figure(figsize=(25, 4))
@@ -53,3 +55,20 @@ def plot_train_test_accuracy_loss(train_losses, train_acc, test_losses, test_acc
     axs[0, 1].set_title("Test Loss")
     axs[1, 1].plot(test_acc)
     axs[1, 1].set_title("Test Accuracy")
+    
+
+# Function to plot misclassified images
+def plot_misclassified_images(images, pred_labels, correct_labels):
+
+    plt.figure(dpi=500);
+    fig, axes = plt.subplots(4, 5, figsize=(15, 7))
+    fig.suptitle("Misclassified Images", fontsize=8)
+
+    for i, ax in enumerate(axes.flat):
+        img = images[i].cpu().permute(1, 2, 0)
+        ax.imshow(np.clip(img, 0, 1),  cmap='viridis', interpolation='bilinear')
+        ax.axis("off")
+        ax.set_title(f"Pred: {pred_labels[i]}, Target: {correct_labels[i]}")
+
+    plt.tight_layout()
+    plt.show()
