@@ -87,3 +87,14 @@ def test():
     net = ResNet18()
     y = net(torch.randn(1, 3, 32, 32))
     print(y.size())
+
+
+def model_summary(model, input_size):
+    """
+    This function displays a summary of the model, providing information about its architecture,
+    layer configuration, and the number of parameters it contains.
+    :param model: model
+    :param input_size: input_size for model
+    :return:
+    """
+    summary(model, input_size=input_size)
