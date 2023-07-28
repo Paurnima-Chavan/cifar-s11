@@ -7,7 +7,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torchsummary import summary
 
-
 class BasicBlock(nn.Module):
     expansion = 1
 
@@ -30,11 +29,11 @@ class BasicBlock(nn.Module):
 
     def forward(self, x):
         out = F.relu(self.bn1(self.conv1(x)))
-        print(f"2. {out.shape}")
+        
         out = self.bn2(self.conv2(out))
-        print(f"3. {out.shape}")
+       
         out += self.shortcut(x)
-        print(f"4. {out.shape}")
+        
         out = F.relu(out)
         return out
 
@@ -63,19 +62,19 @@ class ResNet(nn.Module):
 
     def forward(self, x):
         out = F.relu(self.bn1(self.conv1(x)))
-        print(f"1. {out.shape}")
+       
         out = self.layer1(out)
-        print(f"5. {out.shape}")
+        
         out = self.layer2(out)
-        print(f"6. {out.shape}")
+        
         out = self.layer3(out)
-        print(f"7. {out.shape}")
+       
         out = self.layer4(out)
-        print(f"8. {out.shape}")
-        out = F.avg_pool2d(out, 28)
-        print(f"9. {out.shape}")
+       
+        out = F.avg_pool2d(out, 4)
+       
         out = out.view(out.size(0), -1)
-        print(f"10. {out.shape}")
+        
         out = self.linear(out)
         return out
 
