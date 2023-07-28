@@ -5,7 +5,6 @@ ResNet in PyTorch.
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torchsummary import summary
 
 
 class BasicBlock(nn.Module):
@@ -30,8 +29,11 @@ class BasicBlock(nn.Module):
 
     def forward(self, x):
         out = F.relu(self.bn1(self.conv1(x)))
+        print(f"2. {out.shape}")
         out = self.bn2(self.conv2(out))
+        print(f"3. {out.shape}")
         out += self.shortcut(x)
+        print(f"4. {out.shape}")
         out = F.relu(out)
         return out
 
@@ -41,7 +43,7 @@ class ResNet(nn.Module):
         super(ResNet, self).__init__()
         self.in_planes = 64
 
-        self.conv1 = nn.Conv2d(3, 64, kernel_size=3,
+        self.conv1 = nn.Conv2d(3, 64, kernel_size=7,
                                stride=1, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
         self.layer1 = self._make_layer(block, 64, num_blocks[0], stride=1)
@@ -60,12 +62,19 @@ class ResNet(nn.Module):
 
     def forward(self, x):
         out = F.relu(self.bn1(self.conv1(x)))
+        print(f"1. {out.shape}")
         out = self.layer1(out)
+        print(f"5. {out.shape}")
         out = self.layer2(out)
+        print(f"6. {out.shape}")
         out = self.layer3(out)
+        print(f"7. {out.shape}")
         out = self.layer4(out)
-        out = F.avg_pool2d(out, 4)
+        print(f"8. {out.shape}")
+        out = F.avg_pool2d(out, 28)
+        print(f"9. {out.shape}")
         out = out.view(out.size(0), -1)
+        print(f"10. {out.shape}")
         out = self.linear(out)
         return out
 
@@ -74,19 +83,7 @@ def ResNet18():
     return ResNet(BasicBlock, [2, 2, 2, 2])
 
 
-def model_summary(model, input_size):
-    """
-    This function displays a summary of the model, providing information about its architecture,
-    layer configuration, and the number of parameters it contains.
-    :param model: model
-    :param input_size: input_size for model
-    :return:
-    """
-    summary(model, input_size=input_size)
-
 def test():
     net = ResNet18()
     y = net(torch.randn(1, 3, 32, 32))
     print(y.size())
-
-# test()
