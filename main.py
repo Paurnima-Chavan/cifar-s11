@@ -11,69 +11,55 @@ from torch_lr_finder import LRFinder
 import torch.nn as nn
 from torch.optim.lr_scheduler import OneCycleLR
 
-batch_size = 512
-train_loader, test_loader = load_cifar10_data(batch_size=batch_size)
+def classify_images_for_cifar10():
+    batch_size = 512
+    train_loader, test_loader = load_cifar10_data(batch_size=batch_size)
+    plot_dataset_images(train_loader, 20)
+    # Load the model
+    SEED = 1
+    # CUDA?
+    use_cuda = torch.cuda.is_available()
+    # For reproducibility
+    torch.manual_seed(SEED)
+    if use_cuda:
+        torch.cuda.manual_seed(SEED)
+    device = torch.device("cuda" if use_cuda else "cpu")
+    model = ResNet18()
+    model_summary(model, input_size=(3, 32, 32))
+    optimizer = optim.Adam(model.parameters(), lr=0.02, weight_decay=1e-4)
+    criterion = nn.CrossEntropyLoss()
+    lr_finder = LRFinder(model, optimizer, criterion, device=device)
+    lr_finder.range_test(train_loader, end_lr=10, num_iter=120, step_mode="exp")
+    lr_finder.plot()  # to inspect loss-learning rate graph
+    lr_finder.reset()  # to reset the model amd optimizer to their initial state
+    EPOCHS = 20
+    reset_train_loss()
+    reset_test_loss()
+    optimizer = optim.Adam(model.parameters(), lr=0.03, weight_decay=1e-4)
+    criterion = nn.CrossEntropyLoss()
+    scheduler = OneCycleLR(
+        optimizer,
+        max_lr=4.38E-02,
+        steps_per_epoch=len(train_loader),
+        epochs=EPOCHS,
+        pct_start=2 / EPOCHS,
+        div_factor=100,
+        three_phase=False,
+        final_div_factor=100,
+        anneal_strategy='linear')
+    for epoch in range(1, EPOCHS + 1):
+        print(f"Epoch {epoch}")
+        train(model, device, train_loader, optimizer, epoch, scheduler, criterion)
+        test(model, device, test_loader, criterion)
+    train_losses, train_acc = get_train_loss_acc()
+    test_losses, test_acc = get_test_loss_acc()
+    train_losses = torch.tensor(train_losses, device='cpu')
+    train_acc = torch.tensor(train_acc, device='cpu')
+    test_losses = torch.tensor(test_losses, device='cpu')
+    test_acc = torch.tensor(test_acc, device='cpu')
+    misclassified_images, pred_labels, correct_labels = get_misclassified_images(model, test_loader, device)
+    show_misclassified_images_using_grad_cam(model, misclassified_images, pred_labels, correct_labels, 20)
+    plot_misclassified_images(misclassified_images, pred_labels, correct_labels)
 
-plot_dataset_images(train_loader, 20)
-
-# Load the model
-SEED = 1
-# CUDA?
-use_cuda = torch.cuda.is_available()
-
-# For reproducibility
-torch.manual_seed(SEED)
-
-if use_cuda:
-    torch.cuda.manual_seed(SEED)
-
-device = torch.device("cuda" if use_cuda else "cpu")
-
-model = ResNet18()
-model_summary(model, input_size=(3, 32, 32))
-
-optimizer = optim.Adam(model.parameters(), lr=0.02, weight_decay=1e-4)
-criterion = nn.CrossEntropyLoss()
-
-lr_finder = LRFinder(model, optimizer, criterion, device=device)
-lr_finder.range_test(train_loader, end_lr=10, num_iter=120, step_mode="exp")
-lr_finder.plot()  # to inspect loss-learning rate graph
-lr_finder.reset()  # to reset the model amd optimizer to their initial state
-
-EPOCHS = 20
-reset_train_loss()
-reset_test_loss()
-
-optimizer = optim.Adam(model.parameters(), lr=0.03, weight_decay=1e-4)
-criterion = nn.CrossEntropyLoss()
-scheduler = OneCycleLR(
-    optimizer,
-    max_lr=4.38E-02,
-    steps_per_epoch=len(train_loader),
-    epochs=EPOCHS,
-    pct_start=2 / EPOCHS,
-    div_factor=100,
-    three_phase=False,
-    final_div_factor=100,
-    anneal_strategy='linear')
-
-for epoch in range(1, EPOCHS + 1):
-    print(f"Epoch {epoch}")
-    train(model, device, train_loader, optimizer, epoch, scheduler, criterion)
-    test(model, device, test_loader, criterion)
-
-train_losses, train_acc = get_train_loss_acc()
-test_losses, test_acc = get_test_loss_acc()
-
-train_losses = torch.tensor(train_losses, device='cpu')
-train_acc = torch.tensor(train_acc, device='cpu')
-
-test_losses = torch.tensor(test_losses, device='cpu')
-test_acc = torch.tensor(test_acc, device='cpu')
-
-misclassified_images, pred_labels, correct_labels = get_misclassified_images(model, test_loader, device)
-show_misclassified_images_using_grad_cam(model, misclassified_images, pred_labels, correct_labels, 20)
-
-plot_misclassified_images(misclassified_images, pred_labels, correct_labels)
 
 
