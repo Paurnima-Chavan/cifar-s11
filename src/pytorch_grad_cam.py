@@ -73,7 +73,7 @@ def show_misclassified_images_using_grad_cam(model, misclassified_images, pred_l
 
 def denormalize_image(image):
     # Denormalize and convert to numpy for visualization
-    npimg = image.numpy()
+    npimg = image.cpu().numpy()
     npimg = np.transpose(npimg, (1, 2, 0))
     npimg = ((npimg * [0.229, 0.224, 0.225]) + [0.485, 0.456, 0.406])
     return npimg
